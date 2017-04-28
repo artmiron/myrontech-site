@@ -24,15 +24,13 @@
 
 
 var client = null;
+var topic = "World";
 
 // called when the client connects
 function onConnect() {
   // Once a connection has been made, make a subscription and send a message.
   console.log("onConnect");
-  // client.subscribe("World");
-  // message = new Paho.MQTT.Message("Hello");
-  // message.destinationName = "World";
-  // client.send(message);
+  subscribe();
 }
 
 // called when the client loses its connection
@@ -44,6 +42,7 @@ function onConnectionLost(responseObject) {
 
 // called when a message arrives
 function onMessageArrived(message) {
+    $('#messages').html(message.payloadString);
   console.log("onMessageArrived:"+message.payloadString);
 }
 
@@ -70,10 +69,12 @@ console.log(serverAddr, portNo, clientId);
 
  var subscribe = function(){
     //  client.subscribe("World");
-    var topicId = $("#topicId").val();
-     client.subscribe(topicId);
+    topic = $("#topicId").val();
+    client.subscribe(topic);
 
-    $('#messages').append('<span class="text-info">Subscribed</span><br/>');
+    changeVisibility(true);
+
+    $('#messages').html('<span class="text-info">Connected and Subscribed channel: <b>'+ topic  +'</b></span>');
 
     var pubElem = document.getElementById('publishInput');
     pubElem.addEventListener('keypress', function(ev){
@@ -82,28 +83,46 @@ console.log(serverAddr, portNo, clientId);
                 return;
             }
 // console.log(topicId);
-            publish(this.value, topicId);
+            publish(this.value, topic);
             this.value = "";
         }
 
     });
  };
 
- var publish = function(msg, topic){
+ var publish = function(msg, topicParam){
      message = new Paho.MQTT.Message(msg);
-     message.destinationName = topic;
+     message.destinationName = topicParam;
      client.send(message);
 
  };
 
  var disconnect = function(){
      client.disconnect();
+     changeVisibility(false);
+ };
+
+ var changeVisibility = function(connected){
+    if (connected) {
+        document.getElementById("communicationPanel").classList.remove('hidden');
+        document.getElementById("msgPanel").classList.remove('hidden');
+        document.getElementById("discBtn").classList.remove('hidden');
+        document.getElementById("connectionPanel").classList.add('hidden');
+
+    } else {
+        document.getElementById("communicationPanel").classList.add('hidden');
+        document.getElementById("msgPanel").classList.add('hidden');
+        document.getElementById("discBtn").classList.add('hidden');
+        document.getElementById("connectionPanel").classList.remove('hidden');
+
+    }
  };
 
  $( function() {
      $( "#slider" ).slider({
          slide: function( event, ui ) {
              $("#slideValue").html(ui.value);
+             publish(ui.value.toString(), topic);
          }
      });
    } );
@@ -118,10 +137,8 @@ console.log(serverAddr, portNo, clientId);
     <li class="active">Diode Slider</li>
 </ul>
 
-<div class="row">
-    <div class="col-lg-12">
-        <h2>Diode Slider</h2>
-    </div>
+<div class="col-lg-12">
+    <h2>Diode Slider</h2>
 </div>
 
 <div class="bs-component">
@@ -131,25 +148,32 @@ console.log(serverAddr, portNo, clientId);
     </div>
 </div>
 
-  <p class="bs-component">
+  <p id="connectionPanel" class="bs-component">
       <label class="control-label" for="inputDefault">Server addr:</label>
-      <input type="text" class="form-control" id="servAddr" placeholder="type in IP addr" value="192.168.0.107">
+      <input type="text" class="form-control" id="servAddr" placeholder="type in IP addr" value="192.168.0.108">
       <label class="control-label" for="inputDefault">Port:</label>
       <input type="text" class="form-control" id="portNo" placeholder="type in port number" value="1884">
       <label class="control-label" for="inputDefault">Client:</label>
       <input type="text" class="form-control" id="clientId" placeholder="type in client id" value="client3">
-      <button class="btn btn-primary btn-sm" onclick="connect()">1. Connect</button>
-  </p>
-  <p class="bs-component">
       <label class="control-label" for="inputDefault">Topic name:</label>
       <input type="text" class="form-control" id="topicId" placeholder="type in mqtt topic" value="World">
-      <button class="btn btn-primary btn-sm" onclick="subscribe()">2. Subscribe</button></p>
-  <p class="bs-component">
-      <label class="control-label" for="inputDefault">Publish message</label>
-      <input type="text" class="form-control" id="publishInput" placeholder="Type in your message and press enter">
-  <!-- <button class="btn btn-primary btn-sm" onclick="publish()">3. Publish</button></p> -->
-  <p class="bs-component"><button class="btn btn-primary btn-sm" onclick="disconnect()">(4. Disconnect)</button></p>
-  <p class="bs-component"><div id="messages">messages</div></p>
+      <button class="btn btn-primary btn-sm" onclick="connect()">1. Open channel</button>
+  </p>
+
+  <p id="communicationPanel" class="bs-component hidden">
+      <label class="control-label" for="inputDefault">2. Publish message</label>
+      <input type="text" class="form-control" id="publishInput" placeholder="Type in your message and press enter" />
+
+      <div id="msgPanel" class="panel panel-info hidden">
+        <div class="panel-heading">
+          <h3 class="panel-title">Panel info</h3>
+        </div>
+        <div id="messages" class="panel-body"></div>
+      </div>
+
+      <button id="discBtn" class="btn btn-primary btn-sm hidden" onclick="disconnect()">3. Disconnect</button>
+
+  </p>
 
 
 </body>
