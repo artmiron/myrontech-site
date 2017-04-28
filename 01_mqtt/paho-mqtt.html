@@ -9,7 +9,7 @@
   <meta name="author" content="Iron Myron">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <link rel="stylesheet" href="./css/bootstrap.css" media="screen">
+  <link rel="stylesheet" href="../css/bootstrap.css" media="screen">
   <!-- <link rel="stylesheet" href="../assets/css/custom.min.css"> -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
@@ -103,7 +103,17 @@ console.log(serverAddr, portNo, clientId);
   </head>
 
 <body>
-  <h2>Paho MQTT tests</h2>
+    <ul class="breadcrumb">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="./index.html">MQTT</a></li>
+        <li class="active">Paho MQTT tests</li>
+    </ul>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>Paho MQTT tests</h2>
+        </div>
+    </div>
 
   <p class="bs-component">
       <label class="control-label" for="inputDefault">Server addr:</label>
