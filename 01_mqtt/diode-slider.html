@@ -12,8 +12,14 @@
   <link rel="stylesheet" href="../css/bootstrap.css" media="screen">
   <!-- <link rel="stylesheet" href="../assets/css/custom.min.css"> -->
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
+
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
   <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!--[if lt IE 9]>
@@ -29,7 +35,7 @@ var topic = "World";
 // called when the client connects
 function onConnect() {
   // Once a connection has been made, make a subscription and send a message.
-  console.log("onConnect");
+  console.log("Connection established");
   subscribe();
 }
 
@@ -53,7 +59,7 @@ function onMessageArrived(message) {
         portNo = parseInt($("#portNo").val()), //8000,
         clientId = $("#clientId").val(); //"myclientid_" + parseInt(Math.random() * 100, 10);
 
-console.log(serverAddr, portNo, clientId);
+// console.log(serverAddr, portNo, clientId);
     // Create a client instance
     client = new Paho.MQTT.Client(serverAddr, portNo, clientId);
 
@@ -78,12 +84,14 @@ console.log(serverAddr, portNo, clientId);
 
     var pubElem = document.getElementById('publishInput');
     pubElem.addEventListener('keypress', function(ev){
+
         if (ev.which == 13) {
             if (this.value === "") {
                 return;
             }
-// console.log(topicId);
+
             publish(this.value, topic);
+
             this.value = "";
         }
 
@@ -102,6 +110,12 @@ console.log(serverAddr, portNo, clientId);
      changeVisibility(false);
  };
 
+ /**
+ * change div visibility
+ * @param {Boolean} connected
+ * true - visible panel after connection established
+ * false - visible panel before connection established
+ */
  var changeVisibility = function(connected){
     if (connected) {
         document.getElementById("communicationPanel").classList.remove('hidden');
@@ -117,6 +131,14 @@ console.log(serverAddr, portNo, clientId);
 
     }
  };
+
+var visibility = false;
+
+var toggle = function(){
+    visibility = !visibility;
+    changeVisibility(visibility);
+
+};
 
  $( function() {
      $( "#slider" ).slider({
@@ -137,43 +159,49 @@ console.log(serverAddr, portNo, clientId);
     <li class="active">Diode Slider</li>
 </ul>
 
-<div class="col-lg-12">
-    <h2>Diode Slider</h2>
-</div>
-
 <div class="bs-component">
-    <div class="well">
-        <div id="slideValue">&nbsp;</div>
-        <div id="slider"></div>
+    <div class="col-lg-12">
+        <h2>Diode Slider</h2>
     </div>
 </div>
 
-  <p id="connectionPanel" class="bs-component">
-      <label class="control-label" for="inputDefault">Server addr:</label>
-      <input type="text" class="form-control" id="servAddr" placeholder="type in IP addr" value="192.168.0.108">
-      <label class="control-label" for="inputDefault">Port:</label>
-      <input type="text" class="form-control" id="portNo" placeholder="type in port number" value="1884">
-      <label class="control-label" for="inputDefault">Client:</label>
-      <input type="text" class="form-control" id="clientId" placeholder="type in client id" value="client3">
-      <label class="control-label" for="inputDefault">Topic name:</label>
-      <input type="text" class="form-control" id="topicId" placeholder="type in mqtt topic" value="World">
-      <button class="btn btn-primary btn-sm" onclick="connect()">1. Open channel</button>
-  </p>
+<button class="btn btn-primary btn-sm" onclick="toggle()">Toggler (style cheat)</button>
 
-  <p id="communicationPanel" class="bs-component hidden">
+<div class="bs-component">
+  <div id="connectionPanel" class="bs-component">
+      <label class="control-label" for="inputDefault">Server addr:</label>
+      <input type="text" class="form-control" id="servAddr" placeholder="type in IP addr" value="192.168.0.108" />
+      <label class="control-label" for="inputDefault">Port:</label>
+      <input type="text" class="form-control" id="portNo" placeholder="type in port number" value="1884" />
+      <label class="control-label" for="inputDefault">Client:</label>
+      <input type="text" class="form-control" id="clientId" placeholder="type in client id" value="client3" />
+      <label class="control-label" for="inputDefault">Topic name:</label>
+      <input type="text" class="form-control" id="topicId" placeholder="type in mqtt topic" value="World" />
+      <button class="btn btn-primary btn-sm" onclick="connect()">1. Open channel</button>
+  </div>
+
+
+  <div id="communicationPanel" class="bs-component hidden">
+
+      <div class="well">
+          <div id="slideValue">&nbsp;</div>
+          <div id="slider"></div>
+      </div>
+
       <label class="control-label" for="inputDefault">2. Publish message</label>
       <input type="text" class="form-control" id="publishInput" placeholder="Type in your message and press enter" />
 
       <div id="msgPanel" class="panel panel-info hidden">
         <div class="panel-heading">
-          <h3 class="panel-title">Panel info</h3>
+          <h3 class="panel-title">Last message</h3>
         </div>
         <div id="messages" class="panel-body"></div>
       </div>
 
       <button id="discBtn" class="btn btn-primary btn-sm hidden" onclick="disconnect()">3. Disconnect</button>
 
-  </p>
+  </div>
+</div>
 
 
 </body>
